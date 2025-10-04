@@ -1,5 +1,6 @@
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream, SocketAddr};
+use std::thread;
 
 fn handle_client(mut stream: TcpStream) {
     println!("{:?}", stream);
@@ -9,7 +10,6 @@ fn handle_client(mut stream: TcpStream) {
 
     let request = String::from_utf8_lossy(&buf[..bytes_read]);
 
-    /* get server */
     let html = std::fs::read_to_string("index.html")
         .unwrap();
 
@@ -33,7 +33,9 @@ pub fn main() -> std::io::Result<()> {
     for stream in listener.incoming() {
         match stream {
             Ok(stream) => {
-                handle_client(stream);
+                thread::spawn(|| {
+                    handle_client(stream);
+                });
             }
             Err(e) => {
                 println!("connection failed: {e}");
